@@ -40,7 +40,7 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
   const waMessage = encodeURIComponent(
     `Hi, I'm interested in "${book.t}"${book.a ? ` by ${book.a}` : ""}. Is it still available?`
   );
-  const waLink = `https://wa.me/27817205670?text=${waMessage}`;
+  const waLink = `https://wa.me/27697203470?text=${waMessage}`;
 
   return (
     <div

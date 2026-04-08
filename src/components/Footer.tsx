@@ -25,8 +25,8 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-400">
               <li>Cliffendale Dr, Faerie Glen, Pretoria</li>
               <li>
-                <a href="https://wa.me/27817205670" className="hover:text-brand transition-colors">
-                  WhatsApp: 081 720 5670
+                <a href="https://wa.me/27697203470" className="hover:text-brand transition-colors">
+                  WhatsApp: 069 720 3470
                 </a>
               </li>
             </ul>

@@ -55,10 +55,10 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-gray-200">WhatsApp</h3>
                   <a
-                    href="https://wa.me/27817205670"
+                    href="https://wa.me/27697203470"
                     className="text-brand hover:text-brand-dark text-sm transition-colors"
                   >
-                    081 720 5670
+                    069 720 3470
                   </a>
                 </div>
               </div>
@@ -81,7 +81,7 @@ export default function ContactPage() {
             </div>
 
             <a
-              href="https://wa.me/27817205670"
+              href="https://wa.me/27697203470"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-lg transition-colors"
