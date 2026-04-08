@@ -64,10 +64,12 @@ export default function BrowsePage() {
       );
     }
 
-    // Sort alphabetically by author surname
+    // Sort alphabetically by author surname (no-author books go to end)
     return results.sort((a, b) => {
       const surnameA = a.a.trim().split(/\s+/).pop()?.toLowerCase() || "";
       const surnameB = b.a.trim().split(/\s+/).pop()?.toLowerCase() || "";
+      if (!surnameA && surnameB) return 1;
+      if (surnameA && !surnameB) return -1;
       if (surnameA !== surnameB) return surnameA.localeCompare(surnameB);
       return a.t.toLowerCase().localeCompare(b.t.toLowerCase());
     });
