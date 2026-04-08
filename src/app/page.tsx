@@ -1,10 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import newArrivals from "@/data/new-arrivals.json";
 
 const GALLERY_IMAGES = Array.from({ length: 12 }, (_, i) => ({
   src: `/images/shop-${i + 1}.jpg`,
   alt: `MegaBooks store interior ${i + 1}`,
 }));
+
+const NEW_ARRIVALS = (newArrivals as { t: string; a: string; c: number }[]).slice(0, 24);
 
 export default function Home() {
   return (
@@ -73,6 +76,36 @@ export default function Home() {
               know if it&apos;s still available.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* New Arrivals Section */}
+      <section className="max-w-7xl mx-auto px-4 pb-16">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-gray-200">
+            New Arrivals
+          </h2>
+          <Link
+            href="/browse"
+            className="text-sm text-brand hover:text-brand-dark transition-colors"
+          >
+            View all &rarr;
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {NEW_ARRIVALS.map((book, i) => (
+            <div
+              key={`${book.t}-${i}`}
+              className="bg-dark-light rounded-lg p-4 border border-white/10 hover:border-brand/30 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-200 text-sm leading-tight line-clamp-2">
+                {book.t}
+              </h3>
+              {book.a && (
+                <p className="text-gray-400 text-xs mt-1 line-clamp-1">{book.a}</p>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
