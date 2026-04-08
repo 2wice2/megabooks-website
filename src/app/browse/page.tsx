@@ -81,7 +81,7 @@ export default function BrowsePage() {
   return (
     <>
       {/* Search Header */}
-      <section className="bg-dark-light border-b border-white/10">
+      <section className="glass-strong border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-brand mb-2">Browse Our Stock</h1>
           <p className="text-gray-400 mb-6">
@@ -180,7 +180,7 @@ export default function BrowsePage() {
               {visible.map((book, i) => (
                 <div
                   key={`${book.t}-${book.a}-${i}`}
-                  className={`bg-dark-light rounded-lg p-4 border border-white/10 hover:border-brand/30 transition-colors ${
+                  className={`glass rounded-lg p-4 hover:border-brand/30 transition-colors ${
                     book.s ? "cursor-pointer" : ""
                   }`}
                   onClick={() => book.s && setSelectedBook(book)}

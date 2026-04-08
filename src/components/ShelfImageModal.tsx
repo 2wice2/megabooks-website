@@ -52,7 +52,7 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between bg-dark-light px-4 py-3 rounded-t-xl border border-white/10 border-b-0">
+        <div className="flex items-center justify-between glass-strong px-4 py-3 rounded-t-xl border-b-0">
           <div className="flex items-center gap-3">
             <div>
               <p className="text-sm text-gray-400">

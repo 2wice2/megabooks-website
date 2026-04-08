@@ -49,7 +49,7 @@ export default function Home() {
       {/* Info Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="bg-dark-light rounded-xl p-6 border border-white/10">
+          <div className="glass rounded-xl p-6">
             <div className="text-3xl mb-3">📚</div>
             <h3 className="text-lg font-bold text-brand mb-2">25,000+ Books</h3>
             <p className="text-gray-400 text-sm">
@@ -57,7 +57,7 @@ export default function Home() {
               have something for every reader.
             </p>
           </div>
-          <div className="bg-dark-light rounded-xl p-6 border border-white/10">
+          <div className="glass rounded-xl p-6">
             <div className="text-3xl mb-3">💰</div>
             <h3 className="text-lg font-bold text-brand mb-2">Affordable</h3>
             <p className="text-gray-400 text-sm">
@@ -65,7 +65,7 @@ export default function Home() {
               search our stock online.
             </p>
           </div>
-          <div className="bg-dark-light rounded-xl p-6 border border-white/10">
+          <div className="glass rounded-xl p-6">
             <div className="text-3xl mb-3">📱</div>
             <h3 className="text-lg font-bold text-brand mb-2">Book Requests</h3>
             <p className="text-gray-400 text-sm">
