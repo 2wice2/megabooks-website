@@ -64,7 +64,13 @@ export default function BrowsePage() {
       );
     }
 
-    return results;
+    // Sort alphabetically by author surname
+    return results.sort((a, b) => {
+      const surnameA = a.a.trim().split(/\s+/).pop()?.toLowerCase() || "";
+      const surnameB = b.a.trim().split(/\s+/).pop()?.toLowerCase() || "";
+      if (surnameA !== surnameB) return surnameA.localeCompare(surnameB);
+      return a.t.toLowerCase().localeCompare(b.t.toLowerCase());
+    });
   }, [search, category]);
 
   const visible = filtered.slice(0, visibleCount);
