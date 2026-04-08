@@ -1,0 +1,203 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import stockData from "@/data/stock.json";
+
+interface Book {
+  t: string; // title
+  a: string; // author
+  c: number; // count
+  l: string; // location/category
+}
+
+const books = stockData as Book[];
+
+const CATEGORIES = [
+  "All",
+  "English novels",
+  "Afrikaans novels",
+  "Sci-Fi",
+  "Biographies",
+  "Non-Fiction",
+  "Classics",
+  "Teens-Young Adult",
+  "True Crime",
+  "English Self Help",
+  "English religious Fiction",
+  "English religious Non-Fiction",
+  "English single author",
+  "Afrikaans single author",
+  "Poetry-Plays",
+  "Bibles",
+  "Foreign language",
+  "Myths-Ancient History",
+  "Westerns",
+];
+
+const PAGE_SIZE = 100;
+
+export default function BrowsePage() {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    let results = books;
+
+    if (category !== "All") {
+      results = results.filter((b) => b.l === category);
+    }
+
+    if (q.length >= 2) {
+      results = results.filter(
+        (b) =>
+          b.t.toLowerCase().includes(q) || b.a.toLowerCase().includes(q)
+      );
+    }
+
+    return results;
+  }, [search, category]);
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  return (
+    <>
+      {/* Search Header */}
+      <section className="bg-dark-light border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold text-brand mb-2">Browse Our Stock</h1>
+          <p className="text-gray-400 mb-6">
+            Search through {books.length.toLocaleString()} books. Find
+            something you like? WhatsApp us to check availability.
+          </p>
+
+          {/* Search Bar */}
+          <div className="relative max-w-xl">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by title or author..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setVisibleCount(PAGE_SIZE);
+              }}
+              className="w-full pl-10 pr-4 py-3 bg-dark border border-white/20 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Category Filters */}
+      <section className="border-b border-white/10 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex gap-2 min-w-max">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => {
+                setCategory(cat);
+                setVisibleCount(PAGE_SIZE);
+              }}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                category === cat
+                  ? "bg-brand text-white"
+                  : "bg-dark-light text-gray-400 hover:text-gray-200 border border-white/10"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Results */}
+      <section className="max-w-7xl mx-auto px-4 py-6">
+        <p className="text-sm text-gray-500 mb-4">
+          Showing {Math.min(visibleCount, filtered.length).toLocaleString()} of{" "}
+          {filtered.length.toLocaleString()} books
+          {category !== "All" && (
+            <span>
+              {" "}
+              in <span className="text-brand">{category}</span>
+            </span>
+          )}
+          {search && (
+            <span>
+              {" "}
+              matching &ldquo;<span className="text-brand">{search}</span>&rdquo;
+            </span>
+          )}
+        </p>
+
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 text-gray-500">
+            <p className="text-lg">No books found.</p>
+            <p className="mt-2 text-sm">
+              Try a different search term or category.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {visible.map((book, i) => (
+                <div
+                  key={`${book.t}-${book.a}-${i}`}
+                  className="bg-dark-light rounded-lg p-4 border border-white/10 hover:border-brand/30 transition-colors"
+                >
+                  <h3 className="font-semibold text-gray-200 text-sm leading-tight line-clamp-2">
+                    {book.t}
+                  </h3>
+                  <p className="text-gray-400 text-xs mt-1">{book.a}</p>
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-dark text-gray-400 border border-white/10">
+                      {book.l || "Uncategorized"}
+                    </span>
+                    {book.c > 1 && (
+                      <span className="text-xs text-brand font-medium">
+                        {book.c} copies
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {hasMore && (
+              <div className="text-center mt-8">
+                <button
+                  onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
+                  className="px-6 py-2 bg-dark-light border border-white/20 rounded-lg text-gray-300 hover:text-white hover:border-brand/50 transition-colors"
+                >
+                  Load More ({(filtered.length - visibleCount).toLocaleString()}{" "}
+                  remaining)
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+    </>
+  );
+}
