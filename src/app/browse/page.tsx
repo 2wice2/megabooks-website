@@ -3,17 +3,19 @@
 import { useState, useMemo } from "react";
 import stockData from "@/data/stock.json";
 import newArrivalsData from "@/data/new-arrivals.json";
+import ShelfImageModal from "@/components/ShelfImageModal";
 
 interface Book {
   t: string; // title
   a: string; // author
   c: number; // count
   l: string; // location/category
+  s?: string; // shelf location (e.g. "English novels 45")
 }
 
 const books = stockData as Book[];
 const newArrivals = (newArrivalsData as { t: string; a: string; c: number }[]).map(
-  (b) => ({ ...b, l: "New Arrivals" })
+  (b) => ({ ...b, l: "New Arrivals" }) as Book
 );
 
 const CATEGORIES = [
@@ -45,6 +47,7 @@ export default function BrowsePage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -169,7 +172,10 @@ export default function BrowsePage() {
               {visible.map((book, i) => (
                 <div
                   key={`${book.t}-${book.a}-${i}`}
-                  className="bg-dark-light rounded-lg p-4 border border-white/10 hover:border-brand/30 transition-colors"
+                  className={`bg-dark-light rounded-lg p-4 border border-white/10 hover:border-brand/30 transition-colors ${
+                    book.s ? "cursor-pointer" : ""
+                  }`}
+                  onClick={() => book.s && setSelectedBook(book)}
                 >
                   <h3 className="font-semibold text-gray-200 text-sm leading-tight line-clamp-2">
                     {book.t}
@@ -179,11 +185,29 @@ export default function BrowsePage() {
                     <span className="text-xs px-2 py-0.5 rounded-full bg-dark text-gray-400 border border-white/10">
                       {book.l || "Uncategorized"}
                     </span>
-                    {book.c > 1 && (
-                      <span className="text-xs text-brand font-medium">
-                        {book.c} copies
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {book.c > 1 && (
+                        <span className="text-xs text-brand font-medium">
+                          {book.c} copies
+                        </span>
+                      )}
+                      {book.s && (
+                        <svg
+                          className="w-4 h-4 text-gray-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          title="View shelf image"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -203,6 +227,12 @@ export default function BrowsePage() {
           </>
         )}
       </section>
+
+      {/* Shelf Image Modal */}
+      <ShelfImageModal
+        book={selectedBook}
+        onClose={() => setSelectedBook(null)}
+      />
     </>
   );
 }
