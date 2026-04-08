@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import stockData from "@/data/stock.json";
+import newArrivalsData from "@/data/new-arrivals.json";
 
 interface Book {
   t: string; // title
@@ -11,9 +12,13 @@ interface Book {
 }
 
 const books = stockData as Book[];
+const newArrivals = (newArrivalsData as { t: string; a: string; c: number }[]).map(
+  (b) => ({ ...b, l: "New Arrivals" })
+);
 
 const CATEGORIES = [
   "All",
+  "New Arrivals",
   "English novels",
   "Afrikaans novels",
   "Sci-Fi",
@@ -43,9 +48,9 @@ export default function BrowsePage() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    let results = books;
+    let results: Book[] = category === "New Arrivals" ? newArrivals : books;
 
-    if (category !== "All") {
+    if (category !== "All" && category !== "New Arrivals") {
       results = results.filter((b) => b.l === category);
     }
 
