@@ -77,7 +77,7 @@ export default function BrowsePage() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-brand mb-2">Browse Our Stock</h1>
           <p className="text-gray-400 mb-6">
-            Search through {books.length.toLocaleString()} books. Find
+            Search through {(books.length + newArrivals.length).toLocaleString()} books. Find
             something you like? WhatsApp us to check availability.
           </p>
 
