@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-brand font-bold text-lg mb-3">MegaBooks</h3>
+            <h3 className="text-brand font-bold text-lg mb-3 font-brand">MegaBooks</h3>
             <p className="text-gray-400 text-sm leading-relaxed">
               Pretoria&apos;s favourite second-hand bookshop. Thousands of titles
               across every genre, waiting for their next reader.

@@ -20,7 +20,7 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-5xl md:text-7xl font-black text-brand drop-shadow-lg">
+          <h1 className="text-5xl md:text-7xl font-black text-brand drop-shadow-lg font-brand">
             MegaBooks
           </h1>
           <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-xl mx-auto">
