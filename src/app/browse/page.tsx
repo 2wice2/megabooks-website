@@ -197,7 +197,7 @@ export default function BrowsePage() {
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
-                          title="View shelf image"
+                          aria-label="View shelf image"
                         >
                           <path
                             strokeLinecap="round"
