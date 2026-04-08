@@ -14,7 +14,7 @@ interface Book {
 }
 
 const books = stockData as Book[];
-const newArrivals = (newArrivalsData as { t: string; a: string; c: number }[]).map(
+const newArrivals = (newArrivalsData as { t: string; a: string; c: number; s?: string }[]).map(
   (b) => ({ ...b, l: "New Arrivals" }) as Book
 );
 
