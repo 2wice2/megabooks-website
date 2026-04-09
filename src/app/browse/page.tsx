@@ -41,6 +41,14 @@ const CATEGORIES = [
   "Westerns",
 ];
 
+const CATEGORY_COLORS: Record<string, { pill: string; hover: string }> = {
+  "English novels": { pill: "bg-[#CC00CC]", hover: "hover:border-[#CC00CC]/30" },
+  "Afrikaans novels": { pill: "bg-[#00B359]", hover: "hover:border-[#00B359]/30" },
+  "Biographies": { pill: "bg-white text-black", hover: "hover:border-white/30" },
+};
+const DEFAULT_PILL = "bg-brand";
+const DEFAULT_HOVER = "hover:border-brand/30";
+
 const PAGE_SIZE = 100;
 
 export default function BrowsePage() {
@@ -138,7 +146,7 @@ export default function BrowsePage() {
               }}
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 category === cat
-                  ? "bg-brand text-white"
+                  ? `${CATEGORY_COLORS[cat]?.pill || DEFAULT_PILL} ${CATEGORY_COLORS[cat]?.pill.includes("text-") ? "" : "text-white"}`
                   : "bg-dark-light text-gray-400 hover:text-gray-200 border border-white/10"
               }`}
             >
@@ -180,7 +188,7 @@ export default function BrowsePage() {
               {visible.map((book, i) => (
                 <div
                   key={`${book.t}-${book.a}-${i}`}
-                  className={`glass rounded-lg p-4 hover:border-brand/30 transition-colors ${
+                  className={`glass rounded-lg p-4 ${CATEGORY_COLORS[category]?.hover || DEFAULT_HOVER} transition-colors ${
                     book.s ? "cursor-pointer" : ""
                   }`}
                   onClick={() => book.s && setSelectedBook(book)}
