@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,12 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q7MKVB5CD6" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-Q7MKVB5CD6');`,
-          }}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-Q7MKVB5CD6"
+          strategy="afterInteractive"
         />
+        <Script id="ga-init" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-Q7MKVB5CD6');`}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col">
         <Header />

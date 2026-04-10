@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { shelfImagePath } from "@/lib/shelf-image-path";
+import { useState, useEffect, useCallback } from "react";
+import { shelfImagePath, parseShelfLocation } from "@/lib/shelf-image-path";
+import BookPageIcon from "@/components/BookPageIcon";
 
 interface Book {
   t: string;
@@ -12,31 +13,51 @@ interface Book {
 interface ShelfImageModalProps {
   book: Book | null;
   onClose: () => void;
+  accentColor?: string;
 }
 
-export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps) {
+export default function ShelfImageModal({ book, onClose, accentColor = "#e60000" }: ShelfImageModalProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [offset, setOffset] = useState(0);
+
+  const parsed = book?.s ? parseShelfLocation(book.s) : null;
+  const currentNumber = parsed ? parsed.number + offset : 0;
+  const currentLabel = parsed ? `${parsed.label} ${currentNumber}` : book?.s ?? "";
+  const imgSrc = parsed
+    ? `/shelf-images/${parsed.section}/${parsed.section}-${currentNumber}.jpg`
+    : book?.s ? shelfImagePath(book.s) : "";
 
   useEffect(() => {
     if (book) {
       setLoading(true);
       setError(false);
+      setOffset(0);
     }
   }, [book]);
+
+  const navigate = useCallback((dir: -1 | 1) => {
+    if (!parsed) return;
+    const next = currentNumber + dir;
+    if (next < 1) return;
+    setOffset((prev) => prev + dir);
+    setLoading(true);
+    setError(false);
+  }, [parsed, currentNumber]);
 
   useEffect(() => {
     if (!book) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") navigate(-1);
+      if (e.key === "ArrowRight") navigate(1);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [book, onClose]);
+  }, [book, onClose, navigate]);
 
   if (!book || !book.s) return null;
 
-  const imgSrc = shelfImagePath(book.s);
   const waMessage = encodeURIComponent(
     `Hi, I'm interested in "${book.t}"${book.a ? ` by ${book.a}` : ""}. Is it still available?`
   );
@@ -56,11 +77,13 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           <div className="flex items-center gap-3">
             <div>
               <p className="text-sm text-gray-400">
-                Shelf: <span className="text-brand font-medium">{book.s}</span>
+                Shelf: <span className="text-brand font-medium">{currentLabel}</span>
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {book.t} — {book.a}
-              </p>
+              {offset === 0 && (
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {book.t} — {book.a}
+                </p>
+              )}
             </div>
             <a
               href={waLink}
@@ -84,7 +107,7 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           </button>
         </div>
 
-        {/* Image */}
+        {/* Image with nav arrows */}
         <div className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden">
           {loading && !error && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -99,7 +122,7 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           ) : (
             <img
               src={imgSrc}
-              alt={`Bookshelf: ${book.s}`}
+              alt={`Bookshelf: ${currentLabel}`}
               className={`w-full h-auto max-h-[75vh] object-contain transition-opacity duration-300 ${
                 loading ? "opacity-0" : "opacity-100"
               }`}
@@ -109,6 +132,30 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
                 setError(true);
               }}
             />
+          )}
+
+          {/* Prev button */}
+          {parsed && currentNumber > 1 && (
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 glass-strong text-white rounded-full w-10 h-10 flex items-center justify-center transition-all"
+              style={{ borderColor: `${accentColor}30`, boxShadow: `0 0 12px ${accentColor}30` }}
+              aria-label="Previous shelf"
+            >
+              <BookPageIcon direction="prev" color={accentColor} />
+            </button>
+          )}
+
+          {/* Next button */}
+          {parsed && (
+            <button
+              onClick={() => navigate(1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 glass-strong text-white rounded-full w-10 h-10 flex items-center justify-center transition-all"
+              style={{ borderColor: `${accentColor}30`, boxShadow: `0 0 12px ${accentColor}30` }}
+              aria-label="Next shelf"
+            >
+              <BookPageIcon direction="next" color={accentColor} />
+            </button>
           )}
         </div>
       </div>
