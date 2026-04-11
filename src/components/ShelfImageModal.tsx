@@ -1,8 +1,37 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { shelfImagePath, parseShelfLocation } from "@/lib/shelf-image-path";
-import BookPageIcon from "@/components/BookPageIcon";
+import {
+  shelfImagePath,
+  parseShelfLocation,
+  shelfImagePathFromParts,
+} from "@/lib/shelf-image-path";
+
+// Max image number per section (generated from public/shelf-images)
+const SECTION_MAX: Record<string, number> = {
+  "afrikaans-novels": 21,
+  "afrikaans-single-author": 3,
+  bibles: 5,
+  biographies: 27,
+  classics: 19,
+  "english-novels": 317,
+  "english-religious-fiction": 4,
+  "english-religious-non-fiction": 4,
+  "english-self-help": 16,
+  "english-single-author": 3,
+  "foreign-language": 4,
+  "myths-ancient-history": 2,
+  "new-arrivals": 24,
+  "non-fiction-1": 12,
+  "non-fiction-2": 15,
+  "non-fiction-3": 57,
+  "non-fiction-4": 37,
+  "poetry-plays": 5,
+  "sci-fi": 48,
+  "teens-young-adult": 19,
+  "true-crime": 3,
+  westerns: 4,
+};
 
 interface Book {
   t: string;
@@ -13,55 +42,72 @@ interface Book {
 interface ShelfImageModalProps {
   book: Book | null;
   onClose: () => void;
-  accentColor?: string;
 }
 
-export default function ShelfImageModal({ book, onClose, accentColor = "#e60000" }: ShelfImageModalProps) {
+export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps) {
+  const parsed = book?.s ? parseShelfLocation(book.s) : null;
+  const [currentNum, setCurrentNum] = useState(parsed?.number ?? 1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [offset, setOffset] = useState(0);
 
-  const parsed = book?.s ? parseShelfLocation(book.s) : null;
-  const currentNumber = parsed ? parsed.number + offset : 0;
-  const currentLabel = parsed ? `${parsed.label} ${currentNumber}` : book?.s ?? "";
-  const imgSrc = parsed
-    ? `/shelf-images/${parsed.section}/${parsed.section}-${currentNumber}.jpg`
-    : book?.s ? shelfImagePath(book.s) : "";
+  const section = parsed?.section ?? "";
+  const maxNum = SECTION_MAX[section] ?? 1;
+  const canNav = maxNum > 1;
 
+  // Reset when a new book is selected
   useEffect(() => {
-    if (book) {
+    if (book?.s) {
+      const p = parseShelfLocation(book.s);
+      if (p) setCurrentNum(p.number);
       setLoading(true);
       setError(false);
-      setOffset(0);
     }
   }, [book]);
 
-  const navigate = useCallback((dir: -1 | 1) => {
-    if (!parsed) return;
-    const next = currentNumber + dir;
-    if (next < 1) return;
-    setOffset((prev) => prev + dir);
-    setLoading(true);
-    setError(false);
-  }, [parsed, currentNumber]);
+  // Reset loading state when navigating
+  const navigateTo = useCallback(
+    (num: number) => {
+      if (num < 1 || num > maxNum) return;
+      setCurrentNum(num);
+      setLoading(true);
+      setError(false);
+    },
+    [maxNum]
+  );
+
+  const goPrev = useCallback(
+    () => navigateTo(currentNum - 1),
+    [currentNum, navigateTo]
+  );
+  const goNext = useCallback(
+    () => navigateTo(currentNum + 1),
+    [currentNum, navigateTo]
+  );
 
   useEffect(() => {
     if (!book) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") navigate(-1);
-      if (e.key === "ArrowRight") navigate(1);
+      if (canNav && e.key === "ArrowLeft") goPrev();
+      if (canNav && e.key === "ArrowRight") goNext();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [book, onClose, navigate]);
+  }, [book, onClose, canNav, goPrev, goNext]);
 
-  if (!book || !book.s) return null;
+  if (!book || !book.s || !parsed) return null;
+
+  const imgSrc =
+    currentNum === parsed.number
+      ? shelfImagePath(book.s)
+      : shelfImagePathFromParts(section, currentNum);
 
   const waMessage = encodeURIComponent(
     `Hi, I'm interested in "${book.t}"${book.a ? ` by ${book.a}` : ""}. Is it still available?`
   );
   const waLink = `https://wa.me/27697203470?text=${waMessage}`;
+
+  const sectionLabel = section.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div
@@ -74,16 +120,18 @@ export default function ShelfImageModal({ book, onClose, accentColor = "#e60000"
       >
         {/* Header */}
         <div className="flex items-center justify-between glass-strong px-4 py-3 rounded-t-xl border-b-0">
-          <div className="flex items-center gap-3">
-            <div>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="min-w-0">
               <p className="text-sm text-gray-400">
-                Shelf: <span className="text-brand font-medium">{currentLabel}</span>
+                <span className="text-brand font-medium">{sectionLabel}</span>
+                {" "}
+                <span className="text-gray-500">
+                  {currentNum} / {maxNum}
+                </span>
               </p>
-              {offset === 0 && (
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {book.t} — {book.a}
-                </p>
-              )}
+              <p className="text-xs text-gray-500 mt-0.5 truncate">
+                {book.t} — {book.a}
+              </p>
             </div>
             <a
               href={waLink}
@@ -108,9 +156,9 @@ export default function ShelfImageModal({ book, onClose, accentColor = "#e60000"
         </div>
 
         {/* Image with nav arrows */}
-        <div className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden">
+        <div className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden group">
           {loading && !error && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
             </div>
           )}
@@ -122,7 +170,7 @@ export default function ShelfImageModal({ book, onClose, accentColor = "#e60000"
           ) : (
             <img
               src={imgSrc}
-              alt={`Bookshelf: ${currentLabel}`}
+              alt={`Bookshelf: ${sectionLabel} ${currentNum}`}
               className={`w-full h-auto max-h-[75vh] object-contain transition-opacity duration-300 ${
                 loading ? "opacity-0" : "opacity-100"
               }`}
@@ -134,28 +182,58 @@ export default function ShelfImageModal({ book, onClose, accentColor = "#e60000"
             />
           )}
 
-          {/* Prev button */}
-          {parsed && currentNumber > 1 && (
-            <button
-              onClick={() => navigate(-1)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 glass-strong text-white rounded-full w-10 h-10 flex items-center justify-center transition-all"
-              style={{ borderColor: `${accentColor}30`, boxShadow: `0 0 12px ${accentColor}30` }}
-              aria-label="Previous shelf"
-            >
-              <BookPageIcon direction="prev" color={accentColor} />
-            </button>
-          )}
-
-          {/* Next button */}
-          {parsed && (
-            <button
-              onClick={() => navigate(1)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 glass-strong text-white rounded-full w-10 h-10 flex items-center justify-center transition-all"
-              style={{ borderColor: `${accentColor}30`, boxShadow: `0 0 12px ${accentColor}30` }}
-              aria-label="Next shelf"
-            >
-              <BookPageIcon direction="next" color={accentColor} />
-            </button>
+          {/* Prev / Next nav buttons */}
+          {canNav && (
+            <>
+              {/* Previous — left half of icon goes red on hover */}
+              <button
+                onClick={goPrev}
+                disabled={currentNum <= 1}
+                className="group/prev absolute left-2 top-1/2 -translate-y-1/2 z-20
+                  w-14 h-14 flex items-center justify-center rounded-full
+                  bg-black/60 backdrop-blur-sm
+                  opacity-0 group-hover:opacity-100 transition-opacity
+                  disabled:opacity-0 disabled:cursor-default
+                  active:scale-95"
+                aria-label="Previous shelf image"
+              >
+                <div className="relative w-10 h-10 -scale-x-100">
+                  <img src="/images/books-nav.svg" alt=""
+                    className="absolute inset-0 w-full h-full brightness-0 invert drop-shadow-lg" />
+                  <img src="/images/books-nav.svg" alt=""
+                    className="absolute inset-0 w-full h-full drop-shadow-lg
+                      opacity-0 group-hover/prev:opacity-100 transition-opacity"
+                    style={{
+                      filter: "brightness(0) invert(15%) sepia(100%) saturate(10000%) hue-rotate(0deg)",
+                      clipPath: "inset(0 0 0 48%)",
+                    }} />
+                </div>
+              </button>
+              {/* Next — right half of icon goes red on hover */}
+              <button
+                onClick={goNext}
+                disabled={currentNum >= maxNum}
+                className="group/next absolute right-2 top-1/2 -translate-y-1/2 z-20
+                  w-14 h-14 flex items-center justify-center rounded-full
+                  bg-black/60 backdrop-blur-sm
+                  opacity-0 group-hover:opacity-100 transition-opacity
+                  disabled:opacity-0 disabled:cursor-default
+                  active:scale-95"
+                aria-label="Next shelf image"
+              >
+                <div className="relative w-10 h-10">
+                  <img src="/images/books-nav.svg" alt=""
+                    className="absolute inset-0 w-full h-full brightness-0 invert drop-shadow-lg" />
+                  <img src="/images/books-nav.svg" alt=""
+                    className="absolute inset-0 w-full h-full drop-shadow-lg
+                      opacity-0 group-hover/next:opacity-100 transition-opacity"
+                    style={{
+                      filter: "brightness(0) invert(15%) sepia(100%) saturate(10000%) hue-rotate(0deg)",
+                      clipPath: "inset(0 0 0 48%)",
+                    }} />
+                </div>
+              </button>
+            </>
           )}
         </div>
       </div>

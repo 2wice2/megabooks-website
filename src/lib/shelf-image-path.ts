@@ -1,18 +1,33 @@
-export function parseShelfLocation(location: string): { section: string; number: number; label: string } | null {
+export function shelfImagePath(location: string): string {
+  if (!location) return "";
+  const normalized = location.toLowerCase().replace(/\s+/g, "-");
+  // Split: everything before the last dash is the section, after is the number
+  const lastDash = normalized.lastIndexOf("-");
+  if (lastDash === -1) return "";
+  const section = normalized.substring(0, lastDash);
+  const number = normalized.substring(lastDash + 1);
+  return `/shelf-images/${section}/${section}-${number}.jpg`;
+}
+
+/** Parse a shelf location into its section name and image number. */
+export function parseShelfLocation(location: string): {
+  section: string;
+  number: number;
+} | null {
   if (!location) return null;
   const normalized = location.toLowerCase().replace(/\s+/g, "-");
   const lastDash = normalized.lastIndexOf("-");
   if (lastDash === -1) return null;
   const section = normalized.substring(0, lastDash);
-  const number = parseInt(normalized.substring(lastDash + 1), 10);
-  if (isNaN(number)) return null;
-  // Original label without the number (e.g. "English novels")
-  const label = location.replace(/\s*\d+\s*$/, "");
-  return { section, number, label };
+  const num = parseInt(normalized.substring(lastDash + 1), 10);
+  if (isNaN(num)) return null;
+  return { section, number: num };
 }
 
-export function shelfImagePath(location: string): string {
-  const parsed = parseShelfLocation(location);
-  if (!parsed) return "";
-  return `/shelf-images/${parsed.section}/${parsed.section}-${parsed.number}.jpg`;
+/** Build a shelf image path from section name and number directly. */
+export function shelfImagePathFromParts(
+  section: string,
+  number: number
+): string {
+  return `/shelf-images/${section}/${section}-${number}.jpg`;
 }

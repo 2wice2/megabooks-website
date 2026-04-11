@@ -46,11 +46,6 @@ const CATEGORY_COLORS: Record<string, { pill: string; hover: string; glow: strin
   "Afrikaans novels": { pill: "bg-[#00B359]", hover: "hover:border-[#00B359]/30", glow: "hover:shadow-[0_0_15px_rgba(0,179,89,0.25)]", pillGlow: "shadow-[0_0_12px_rgba(0,179,89,0.5)]" },
   "Biographies": { pill: "bg-white text-black", hover: "hover:border-white/30", glow: "hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]", pillGlow: "shadow-[0_0_12px_rgba(255,255,255,0.4)]" },
 };
-const CATEGORY_HEX: Record<string, string> = {
-  "English novels": "#CC00CC",
-  "Afrikaans novels": "#00B359",
-  "Biographies": "#FFFFFF",
-};
 const DEFAULT_PILL = "bg-brand";
 const DEFAULT_HOVER = "hover:border-brand/30";
 const DEFAULT_GLOW = "hover:shadow-[0_0_15px_rgba(230,0,0,0.25)]";
@@ -100,7 +95,8 @@ export default function BrowsePage() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-brand mb-2">Browse Our Stock</h1>
           <p className="text-gray-400 mb-6">
-            Search through {(books.length + newArrivals.length).toLocaleString("en-ZA")} books. Find
+            Search through {(books.length + newArrivals.length).toLocaleString("en-ZA")} books.{" "}
+            <span className="text-brand">Shelf photos: 24 March 2026</span>. Find
             something you like? WhatsApp us to check availability.
           </p>
 
@@ -255,7 +251,6 @@ export default function BrowsePage() {
       <ShelfImageModal
         book={selectedBook}
         onClose={() => setSelectedBook(null)}
-        accentColor={selectedBook ? (CATEGORY_HEX[selectedBook.l] ?? "#e60000") : "#e60000"}
       />
     </>
   );
