@@ -34,6 +34,12 @@ export default function Home() {
             >
               Browse Our Stock
             </Link>
+            <Link
+              href="/new-books"
+              className="inline-block bg-[#FF6B00] hover:bg-[#E05500] text-white font-bold px-8 py-3 rounded-lg transition-colors"
+            >
+              Order New Books
+            </Link>
             <a
               href="https://wa.me/27697203470"
               target="_blank"
