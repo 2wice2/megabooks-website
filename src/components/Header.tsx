@@ -17,7 +17,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 glass-strong">
+    <header className="sticky top-0 z-50 glass-strong shadow-[0_2px_12px_rgba(0,0,0,0.8)]" style={{ backgroundColor: "rgba(26,26,26,0.92)" }}>
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
         <Link href="/" className="flex items-center gap-3">
           <Image

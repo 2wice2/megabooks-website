@@ -20,7 +20,7 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-5xl md:text-7xl font-black text-brand drop-shadow-lg font-brand">
+          <h1 className="text-5xl md:text-7xl font-normal font-brand" style={{ color: "#e60000", textShadow: "2px 2px 4px rgba(0,0,0,0.5)" }}>
             MegaBooks
           </h1>
           <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-xl mx-auto">
