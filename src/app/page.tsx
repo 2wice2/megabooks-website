@@ -71,14 +71,14 @@ export default function Home() {
               search our stock online.
             </p>
           </div>
-          <div className="glass rounded-xl p-6">
+          <Link href="/request" className="glass rounded-xl p-6 block hover:border-brand/30 transition-all">
             <div className="text-3xl mb-3">📱</div>
             <h3 className="text-lg font-bold text-brand mb-2">Book Requests</h3>
             <p className="text-gray-400 text-sm">
-              Looking for something specific? WhatsApp us and we&apos;ll let you
-              know if it&apos;s still available.
+              Looking for something specific? Search by author and title —
+              we&apos;ll check stock and help you source it.
             </p>
-          </div>
+          </Link>
         </div>
       </section>
 
