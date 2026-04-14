@@ -11,19 +11,29 @@ interface StockBook {
   s?: string;
 }
 
-interface OLAuthor {
-  key: string;
+interface AuthorOption {
   name: string;
-  work_count: number;
 }
 
-interface OLWork {
+interface TitleOption {
   title: string;
+  authors: string[];
 }
 
 const stock = stockData as StockBook[];
 
 const WA_NUMBER = "27697203470";
+
+const GOOGLE_BOOKS_BASE = "https://www.googleapis.com/books/v1/volumes";
+const API_KEY = typeof window !== "undefined"
+  ? (process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY || "")
+  : "";
+
+function booksUrl(query: string, maxResults = 20) {
+  const params = new URLSearchParams({ q: query, maxResults: String(maxResults) });
+  if (API_KEY) params.set("key", API_KEY);
+  return `${GOOGLE_BOOKS_BASE}?${params}`;
+}
 
 function debounce<T extends (...args: never[]) => void>(fn: T, ms: number) {
   let id: ReturnType<typeof setTimeout>;
@@ -36,15 +46,15 @@ function debounce<T extends (...args: never[]) => void>(fn: T, ms: number) {
 export default function BookRequestForm() {
   // --- Author state ---
   const [authorQuery, setAuthorQuery] = useState("");
-  const [authorResults, setAuthorResults] = useState<OLAuthor[]>([]);
-  const [selectedAuthor, setSelectedAuthor] = useState<OLAuthor | null>(null);
+  const [authorResults, setAuthorResults] = useState<AuthorOption[]>([]);
+  const [selectedAuthor, setSelectedAuthor] = useState<AuthorOption | null>(null);
   const [authorLoading, setAuthorLoading] = useState(false);
   const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
   const authorRef = useRef<HTMLDivElement>(null);
 
   // --- Title state ---
   const [titleQuery, setTitleQuery] = useState("");
-  const [titleResults, setTitleResults] = useState<OLWork[]>([]);
+  const [titleResults, setTitleResults] = useState<TitleOption[]>([]);
   const [selectedTitle, setSelectedTitle] = useState("");
   const [titleLoading, setTitleLoading] = useState(false);
   const [showTitleDropdown, setShowTitleDropdown] = useState(false);
@@ -67,7 +77,7 @@ export default function BookRequestForm() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // --- Author search (Open Library) ---
+  // --- Author search (Google Books) ---
   const searchAuthors = useCallback(
     debounce(async (q: string) => {
       if (q.length < 2) {
@@ -76,22 +86,28 @@ export default function BookRequestForm() {
       }
       setAuthorLoading(true);
       try {
-        const res = await fetch(
-          `https://openlibrary.org/search/authors.json?q=${encodeURIComponent(q)}&limit=8`
-        );
+        const res = await fetch(booksUrl(`inauthor:${q}`, 20));
         const data = await res.json();
-        setAuthorResults(
-          (data.docs || [])
-            .filter((a: OLAuthor) => a.work_count > 0)
-            .slice(0, 8)
-        );
+        // Extract unique author names from results
+        const seen = new Set<string>();
+        const authors: AuthorOption[] = [];
+        for (const item of data.items || []) {
+          for (const name of item.volumeInfo?.authors || []) {
+            const lower = name.toLowerCase();
+            if (!seen.has(lower) && lower.includes(q.toLowerCase())) {
+              seen.add(lower);
+              authors.push({ name });
+            }
+          }
+        }
+        setAuthorResults(authors.slice(0, 8));
         setShowAuthorDropdown(true);
       } catch {
         setAuthorResults([]);
       } finally {
         setAuthorLoading(false);
       }
-    }, 350),
+    }, 300),
     []
   );
 
@@ -105,27 +121,33 @@ export default function BookRequestForm() {
     searchAuthors(val as never);
   }
 
-  function pickAuthor(author: OLAuthor) {
+  function pickAuthor(author: AuthorOption) {
     setSelectedAuthor(author);
     setAuthorQuery(author.name);
     setShowAuthorDropdown(false);
     setTitleQuery("");
     setSelectedTitle("");
     setStockMatch(null);
-    loadWorks(author.key);
+    loadWorks(author.name);
   }
 
-  // --- Load works for selected author ---
-  async function loadWorks(authorKey: string) {
+  // --- Load works for selected author (Google Books) ---
+  async function loadWorks(authorName: string) {
     setTitleLoading(true);
     try {
-      const res = await fetch(
-        `https://openlibrary.org/authors/${authorKey}/works.json?limit=50`
-      );
+      const res = await fetch(booksUrl(`inauthor:"${authorName}"`, 40));
       const data = await res.json();
-      const works: OLWork[] = (data.entries || [])
-        .filter((w: OLWork) => w.title)
-        .sort((a: OLWork, b: OLWork) => a.title.localeCompare(b.title));
+      const seen = new Set<string>();
+      const works: TitleOption[] = [];
+      for (const item of data.items || []) {
+        const vi = item.volumeInfo;
+        if (!vi?.title) continue;
+        const key = vi.title.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        works.push({ title: vi.title, authors: vi.authors || [] });
+      }
+      works.sort((a, b) => a.title.localeCompare(b.title));
       setTitleResults(works);
     } catch {
       setTitleResults([]);
@@ -133,6 +155,38 @@ export default function BookRequestForm() {
       setTitleLoading(false);
     }
   }
+
+  // --- Live title search as user types (Google Books) ---
+  const searchTitles = useCallback(
+    debounce(async (q: string, authorName: string) => {
+      if (q.length < 2) return;
+      setTitleLoading(true);
+      try {
+        const res = await fetch(
+          booksUrl(`inauthor:"${authorName}"+intitle:${q}`, 20)
+        );
+        const data = await res.json();
+        const seen = new Set<string>();
+        const works: TitleOption[] = [];
+        for (const item of data.items || []) {
+          const vi = item.volumeInfo;
+          if (!vi?.title) continue;
+          const key = vi.title.toLowerCase();
+          if (seen.has(key)) continue;
+          seen.add(key);
+          works.push({ title: vi.title, authors: vi.authors || [] });
+        }
+        works.sort((a, b) => a.title.localeCompare(b.title));
+        setTitleResults(works);
+        setShowTitleDropdown(true);
+      } catch {
+        /* keep existing results */
+      } finally {
+        setTitleLoading(false);
+      }
+    }, 300),
+    []
+  );
 
   // --- Title filtering ---
   const filteredTitles = titleQuery.length >= 1
@@ -146,6 +200,10 @@ export default function BookRequestForm() {
     setSelectedTitle("");
     setStockMatch(null);
     setShowTitleDropdown(true);
+    // If author is selected, do a live Google Books search for better results
+    if (selectedAuthor && val.length >= 2) {
+      searchTitles(val as never, selectedAuthor.name as never);
+    }
   }
 
   function pickTitle(title: string) {
@@ -216,14 +274,11 @@ export default function BookRequestForm() {
           <ul className="absolute z-30 mt-1 w-full bg-dark-light border border-white/20 rounded-lg shadow-xl max-h-60 overflow-y-auto">
             {authorResults.map((a) => (
               <li
-                key={a.key}
+                key={a.name}
                 onClick={() => pickAuthor(a)}
                 className="px-4 py-3 hover:bg-brand/20 cursor-pointer transition-colors border-b border-white/5 last:border-0"
               >
                 <span className="text-gray-200 font-medium">{a.name}</span>
-                <span className="text-gray-500 text-xs ml-2">
-                  {a.work_count} work{a.work_count !== 1 ? "s" : ""}
-                </span>
               </li>
             ))}
           </ul>
