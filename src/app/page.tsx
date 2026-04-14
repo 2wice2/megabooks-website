@@ -40,6 +40,12 @@ export default function Home() {
             >
               Order New Books
             </Link>
+            <Link
+              href="/request"
+              className="inline-block bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg transition-colors"
+            >
+              Request a Book
+            </Link>
             <a
               href="https://wa.me/27697203470"
               target="_blank"
