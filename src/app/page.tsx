@@ -1,10 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-
-const GALLERY_IMAGES = Array.from({ length: 12 }, (_, i) => ({
-  src: `/images/shop-${i + 1}.jpg`,
-  alt: `MegaBooks store interior ${i + 1}`,
-}));
+import GallerySection from "@/components/GallerySection";
 
 export default function Home() {
   return (
@@ -88,28 +84,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="max-w-7xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-bold text-center mb-8 text-gray-200">
-          Take a Look Around Our Store
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {GALLERY_IMAGES.map((img) => (
-            <div
-              key={img.src}
-              className="relative aspect-video rounded-lg overflow-hidden group"
-            >
-              <Image
-                src={img.src}
-                alt={img.alt}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+      <GallerySection />
     </>
   );
 }
