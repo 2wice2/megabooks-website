@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   shelfImagePath,
   parseShelfLocation,
@@ -95,6 +95,32 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
     return () => window.removeEventListener("keydown", handleKey);
   }, [book, onClose, canNav, goPrev, goNext]);
 
+  // --- Touch swipe support ---
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const onTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null || !canNav) return;
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      const dy = e.changedTouches[0].clientY - touchStartY.current;
+      touchStartX.current = null;
+      touchStartY.current = null;
+      // Only trigger if horizontal swipe is dominant and > 50px
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) goNext();
+        else goPrev();
+      }
+    },
+    [canNav, goNext, goPrev]
+  );
+
   if (!book || !book.s || !parsed) return null;
 
   const imgSrc =
@@ -155,8 +181,13 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           </button>
         </div>
 
-        {/* Image with nav arrows */}
-        <div className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden group">
+        {/* Image with nav arrows + swipe */}
+        <div
+          ref={imageContainerRef}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden group"
+        >
           {loading && !error && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
