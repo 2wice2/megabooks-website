@@ -185,53 +185,35 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           {/* Prev / Next nav buttons */}
           {canNav && (
             <>
-              {/* Previous — left half of icon goes red on hover */}
               <button
                 onClick={goPrev}
                 disabled={currentNum <= 1}
-                className="group/prev absolute left-2 top-1/2 -translate-y-1/2 z-20
-                  w-14 h-14 flex items-center justify-center rounded-full
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-20
+                  w-12 h-12 flex items-center justify-center rounded-full
                   bg-black/60 backdrop-blur-sm
-                  opacity-0 group-hover:opacity-100 transition-opacity
-                  disabled:opacity-0 disabled:cursor-default
+                  opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity
+                  disabled:hidden
                   active:scale-95"
                 aria-label="Previous shelf image"
               >
-                <div className="relative w-10 h-10 -scale-x-100">
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full brightness-0 invert drop-shadow-lg" />
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full drop-shadow-lg
-                      opacity-0 group-hover/prev:opacity-100 transition-opacity"
-                    style={{
-                      filter: "brightness(0) invert(15%) sepia(100%) saturate(10000%) hue-rotate(0deg)",
-                      clipPath: "inset(0 0 0 48%)",
-                    }} />
-                </div>
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
-              {/* Next — right half of icon goes red on hover */}
               <button
                 onClick={goNext}
                 disabled={currentNum >= maxNum}
-                className="group/next absolute right-2 top-1/2 -translate-y-1/2 z-20
-                  w-14 h-14 flex items-center justify-center rounded-full
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-20
+                  w-12 h-12 flex items-center justify-center rounded-full
                   bg-black/60 backdrop-blur-sm
-                  opacity-0 group-hover:opacity-100 transition-opacity
-                  disabled:opacity-0 disabled:cursor-default
+                  opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity
+                  disabled:hidden
                   active:scale-95"
                 aria-label="Next shelf image"
               >
-                <div className="relative w-10 h-10">
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full brightness-0 invert drop-shadow-lg" />
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full drop-shadow-lg
-                      opacity-0 group-hover/next:opacity-100 transition-opacity"
-                    style={{
-                      filter: "brightness(0) invert(15%) sepia(100%) saturate(10000%) hue-rotate(0deg)",
-                      clipPath: "inset(0 0 0 48%)",
-                    }} />
-                </div>
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
               </button>
             </>
           )}
