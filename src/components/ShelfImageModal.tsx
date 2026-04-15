@@ -185,35 +185,57 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           {/* Prev / Next nav buttons */}
           {canNav && (
             <>
+              {/* Previous — book icon flipped */}
               <button
                 onClick={goPrev}
                 disabled={currentNum <= 1}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-20
-                  w-12 h-12 flex items-center justify-center rounded-full
+                className="group/prev absolute left-2 top-1/2 -translate-y-1/2 z-20
+                  w-14 h-14 flex items-center justify-center rounded-full
                   bg-black/60 backdrop-blur-sm
                   opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity
                   disabled:hidden
                   active:scale-95"
                 aria-label="Previous shelf image"
               >
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                </svg>
+                <div
+                  className="w-10 h-10 -scale-x-100 transition-colors bg-white group-hover/prev:bg-brand"
+                  style={{
+                    maskImage: "url(/images/books-nav.svg)",
+                    WebkitMaskImage: "url(/images/books-nav.svg)",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                  }}
+                />
               </button>
+              {/* Next — book icon */}
               <button
                 onClick={goNext}
                 disabled={currentNum >= maxNum}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-20
-                  w-12 h-12 flex items-center justify-center rounded-full
+                className="group/next absolute right-2 top-1/2 -translate-y-1/2 z-20
+                  w-14 h-14 flex items-center justify-center rounded-full
                   bg-black/60 backdrop-blur-sm
                   opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity
                   disabled:hidden
                   active:scale-95"
                 aria-label="Next shelf image"
               >
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                </svg>
+                <div
+                  className="w-10 h-10 transition-colors bg-white group-hover/next:bg-brand"
+                  style={{
+                    maskImage: "url(/images/books-nav.svg)",
+                    WebkitMaskImage: "url(/images/books-nav.svg)",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                  }}
+                />
               </button>
             </>
           )}
