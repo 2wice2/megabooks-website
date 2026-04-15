@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   shelfImagePath,
   parseShelfLocation,
@@ -95,6 +95,32 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
     return () => window.removeEventListener("keydown", handleKey);
   }, [book, onClose, canNav, goPrev, goNext]);
 
+  // --- Touch swipe support ---
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const onTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null || !canNav) return;
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      const dy = e.changedTouches[0].clientY - touchStartY.current;
+      touchStartX.current = null;
+      touchStartY.current = null;
+      // Only trigger if horizontal swipe is dominant and > 50px
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) goNext();
+        else goPrev();
+      }
+    },
+    [canNav, goNext, goPrev]
+  );
+
   if (!book || !book.s || !parsed) return null;
 
   const imgSrc =
@@ -155,8 +181,13 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           </button>
         </div>
 
-        {/* Image with nav arrows */}
-        <div className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden group">
+        {/* Image with nav arrows + swipe */}
+        <div
+          ref={imageContainerRef}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          className="relative bg-dark rounded-b-xl border border-white/10 border-t-0 overflow-hidden group"
+        >
           {loading && !error && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
@@ -185,53 +216,57 @@ export default function ShelfImageModal({ book, onClose }: ShelfImageModalProps)
           {/* Prev / Next nav buttons */}
           {canNav && (
             <>
-              {/* Previous — left half of icon goes red on hover */}
+              {/* Previous — book icon flipped */}
               <button
                 onClick={goPrev}
                 disabled={currentNum <= 1}
                 className="group/prev absolute left-2 top-1/2 -translate-y-1/2 z-20
                   w-14 h-14 flex items-center justify-center rounded-full
                   bg-black/60 backdrop-blur-sm
-                  opacity-0 group-hover:opacity-100 transition-opacity
-                  disabled:opacity-0 disabled:cursor-default
+                  opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity
+                  disabled:hidden
                   active:scale-95"
                 aria-label="Previous shelf image"
               >
-                <div className="relative w-10 h-10 -scale-x-100">
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full brightness-0 invert drop-shadow-lg" />
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full drop-shadow-lg
-                      opacity-0 group-hover/prev:opacity-100 transition-opacity"
-                    style={{
-                      filter: "brightness(0) invert(15%) sepia(100%) saturate(10000%) hue-rotate(0deg)",
-                      clipPath: "inset(0 0 0 48%)",
-                    }} />
-                </div>
+                <div
+                  className="w-10 h-10 -scale-x-100 transition-colors bg-white group-hover/prev:bg-brand"
+                  style={{
+                    maskImage: "url(/images/books-nav.svg)",
+                    WebkitMaskImage: "url(/images/books-nav.svg)",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                  }}
+                />
               </button>
-              {/* Next — right half of icon goes red on hover */}
+              {/* Next — book icon */}
               <button
                 onClick={goNext}
                 disabled={currentNum >= maxNum}
                 className="group/next absolute right-2 top-1/2 -translate-y-1/2 z-20
                   w-14 h-14 flex items-center justify-center rounded-full
                   bg-black/60 backdrop-blur-sm
-                  opacity-0 group-hover:opacity-100 transition-opacity
-                  disabled:opacity-0 disabled:cursor-default
+                  opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity
+                  disabled:hidden
                   active:scale-95"
                 aria-label="Next shelf image"
               >
-                <div className="relative w-10 h-10">
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full brightness-0 invert drop-shadow-lg" />
-                  <img src="/images/books-nav.svg" alt=""
-                    className="absolute inset-0 w-full h-full drop-shadow-lg
-                      opacity-0 group-hover/next:opacity-100 transition-opacity"
-                    style={{
-                      filter: "brightness(0) invert(15%) sepia(100%) saturate(10000%) hue-rotate(0deg)",
-                      clipPath: "inset(0 0 0 48%)",
-                    }} />
-                </div>
+                <div
+                  className="w-10 h-10 transition-colors bg-white group-hover/next:bg-brand"
+                  style={{
+                    maskImage: "url(/images/books-nav.svg)",
+                    WebkitMaskImage: "url(/images/books-nav.svg)",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                  }}
+                />
               </button>
             </>
           )}
